@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style type="text/css">
+      [v-cloak]{
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div id="container"></div>
+    </div>
+    <script type="text/javascript" src="http://unpkg.com/@antv/g2plot@latest/dist/g2plot.min.js"></script>
+    <script>
+      //每5s自动刷新页面
+      setTimeout(function() { location.reload() }, 2000000);
+      const { Line } = G2Plot;
+
+      const data = [
+        { year: 1991, value: 3},
+        { year: 1992, value: 4},
+        { year: 1993, value: 3.5},
+        { year: 1994, value: 5},
+        { year: 1995, value: 4.9},
+        { year: 1996, value: 6},
+        { year: 1997, value: 7},
+        { year: 1998, value: 9},
+        { year: 1999, value: 13},
+      ];
+
+      const line = new Line('container', {
+        
+        /*--- 图表容器 ---*/
+        width: 400, //图表宽度 默认400
+        height: 400, //图表高度 默认400
+        autoFit: true, //图标是否自适应容器宽高 默认true 此时width和height均失效
+        padding: 'auto', //画布的padding值，代表图表上右下左的间距，可为单个数字，或数组[100,10,100,50]，或开启'auto' 由底层自动计算间距
+        appendPadding: 10, //额外增加的appendPadding值，number[]|number
+        renderer: 'canvas', //图表渲染方式，canvas(default) 或 svg
+        pixelRatio: window.devicePixelRatio,//number 图表渲染的像素比，和底层的 devicePixelRatio 含义一致，一般不用设置，除非在页面有整体 scale 的情况下，可以自定义
+        
+        /*--- 数据映射 ---*/
+        data, //图表数据源
+        xField: 'year', //图形在x方向对应的数据字段名
+        yField: 'value', //图形在y方向对应的数据字段名
+        //seriesField: '', //分组字段，用于同时看一个维度中不同情况的指标需求
+        meta: { //全局化配置图表数据元信息，以字段为单位进行配置。在meta上的配置将同时影响所有组件的文本信息
+          alias: '', //字段别名
+          formatter: (e) => (function() {e}), //callback方法，对该字段所有值进行格式化处理
+          values: [''], //枚举该字段下所有值
+          range: [0,1] //字段的数据映射区间，默认[0,1]
+        },
+
+        /*--- 图形样式 ---*/
+        smooth: true, //曲线是否平滑，false(default)
+        //stepType: 'vh', //hv|vh|hvh|vhv 阶梯折线图类型，配置后smooth无效，h 表示 horizontal，v 表示 vertical，所以vh表示起始点先竖直再水平
+        //connectNulls: true, //true(default)，对于折线图中缺失的值，是否连接空数据为一条线，或者折线断开
+        isStack: false, //false(default)，对于存在 seriesField 分组字段的情况，是否允许折线堆叠累加起来
+        // color optional string|string[]|Function
+        //colorField: 'type', //多色的字段名，设置了colorField，可以设置一系列颜色，也可以通过回调函数的方法根据对应值进行设置
+        /*color: '#a8ddb5', //设置单一颜色
+        color: ['#d62728', '#2ca02c', '#000000'],
+        color: ({ type }) => {
+          if (type === 'male') {
+            return 'red';
+          }
+          //TODO
+          return 'yellow';
+        },*/
+        // style 不同的图有不同的样式配置 如折线图lineStyle,柱状图columnStyle
+        // 绘图属性 ShapeStyle 的详细介绍 https://g2plot.antv.vision/zh/docs/manual/graphic-style
+        // 可以传入 ShapeStyle 结构，也可以使用回调函数的方式
+        lineStyle: {
+          //fill: 'red', //图形的填充色
+          fillOpacity: 0.5, //图形的填充透明度
+          stroke: 'green', //图形的描边
+          strokeOpacity: 0.7, //图形边框透明度
+          lineWidth: 1, //图形描边的宽度
+          lineDash: [10, 1], //描边的虚线配置，[虚线每个分段的长度，分段间隔的距离]
+          lineOpacity: 0.5, //描边透明度
+          opacity: 0.8, //图形的整体透明度
+          shadowColor: 'black', //图形阴影颜色
+          shadowBlur: 10, //图形阴影的高斯模糊系数
+          shadowOffsetX: 5, //阴影距图形的水平距离
+          shadowOffsetY: 5, //阴影距图形的垂直距离
+          cursor: 'pointer', //鼠标样式，同css的鼠标样式，默认为'default'
+        },
+        // 折线数据点图形样式
+        point: {
+          // 数据点颜色，string|string[]|Function，color: (x, y, series) => string
+          color: '#000000',
+          // 数据点形状，string|Function
+          shape: '',
+          // 数据点大小，number|Function
+          size: 5,
+          // 数据点样式，object|Function
+          style: '',
+        },
+        
+        /*--- 图表组件 ---*/
+        tooltip: {
+          // 显示的字段，不同的图表有不同的默认字段列表，如这个折线图默认显示value
+          fields: ['year','value'],
+          // 对tooltip显示的值进行格式处理
+          formatter: (datum) => {
+            return { name: datum.year, value: datum.value + '%'} // 例：1996: 5%
+          },
+          // 设置tooltip内容框是否跟随鼠标移动 默认true
+          follow: false,
+          // tooltip是否允许鼠标滑入 默认false
+          enterable: true,
+          // 是否展示tooltip标题 默认false
+          showTitle: true,
+          // tooltip标题，如果值为数据字段名，则展示该字段对应数值，否则展示title值
+          title: 'value',
+          // 固定展示位置，相对于数据点 follow=false时不生效
+          positon: 'right', // top|bottom|left|right
+          // true合并当前点的所有数据并展示，false表示只展示离当前点最逼急的数据内容
+          shared: true,
+          // 是否展示crosshairs 默认false
+          showCrosshairs: true,
+          crosshairs: {
+            // x|y|xy 类型，x表示x轴上的辅助线，y表示y轴上的辅助线
+            type: 'x', 
+            // lineStyle 线配置项
+            line: {}, 
+            // textStyle 辅助线文本配置 支持回调
+            text: {
+              // 文字大小
+              fontSize: 80,
+              // 文字字体
+              fontFamily: '',
+              // 文字粗细
+              fontWeight: 300,
+              // 文字行高
+              lineHeight: 10,
+              // 文本内容对齐方式 center|end|left|right|start(default)
+              textAlign: 'center',
+              // 文字填充色
+              fill: 'red',
+              fillOpacity: 0.5,
+              // 文字的描边
+              stroke: 'green',
+              // 描边的宽度
+              lineWidth: 10,
+              // 描边的虚线配置
+              lineDash: [0,0],
+              // 描边透明度
+              lineOpacity: 0.9,
+              // 文字整体透明度
+              opacity: 1,
+              // 文字阴影颜色
+              shadowColor: 'green',
+              // 文字阴影的高斯模糊系数
+              shadowBlur: 10,
+              shadowOffsetX: 10,
+              shadowOffsetY: 10,
+              cursor: 'default'
+            }, 
+            // textBackgroundStyle 辅助线文本背景配置
+            textBackground: {
+              padding: 10, // 文本背景周围的留白
+              style: {}, // 线的配置项 shapeStyle //TODO 这与上面的line配置的区别在哪
+            }, 
+          },
+          // 是否渲染 tooltipMarkers
+          showMarkers: true,
+          // tooltipMarker 的样式配置
+          marker: {},
+          //是否展示 tooltip 内容框 false(default)
+          showContent: true,
+          // 用于指定图例容器的模板，自定义模板时必须包含各个dom节点的class
+          //container: '', 
+          // 每项记录的默认模板，自定义模板时必须包含各个dom节点的class
+          itemTpl: '',
+          // 传入各个dom的样式 TooltipDomStyles
+          domStyles: {
+            /* Tooltip 内容框的 css 样式定义 */
+            // 'g2-tooltip'?: object,
+            // 'g2-tooltip-title'?: object,
+            // 'g2-tooltip-list'?: object,
+            // 'g2-tooltip-list-item'?: object,
+            // 'g2-tooltip-marker'?: object,
+            // 'g2-tooltip-value'?: object,
+            // 'g2-tooltip-name'?: object,
+          },
+          offset: 10, // tooltip 偏移量
+          // 支持自定义模板 Function
+          customContent: (title, data) => {
+            return `<div>${title}</div>`;
+          }
+        }
+      });
+
+      line.render();
+    </script>
+  </body>
+</html>
