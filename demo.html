@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style type="text/css">
+		[v-cloak]{
+			display: none;
+		}
+	</style>
+</head>
+<body>
+	<!-- 容器 1.提供标签用于填充数据 -->
+	<div id="app">
+		<!--插值表达式 数据填充到该标签-->
+		<div v-cloak>{{msg}}</div>
+		<!-- 会出现闪动 -->
+		<div>{{msg}}</div>
+		<div v-text>{{msg}}</div>
+		<div v-html>{{msg1}}</div>
+		<div v-pre>{{msg}}</div>
+		<div v-once>{{msg}}</div>
+		<input type="text" v-model="msg" />
+		<div v-cloak>{{num}}</div>
+		<button v-on:click='num++'>click++</button>
+		<button @click='num--'>click--</button>
+		<button @click='plus'>plus</button>
+		<div v-on:click='handle0'>
+			<button @click='handle1'>button1</button>
+		</div>
+		<!-- 前面可传多个参数 最后一个参数表示事件对象 -->
+		<!-- $event 变量名称固定 -->
+		<button @click='handle2("hi",2,$event)'>button2</button>
+	</div>
+	<!-- 引入vue.js库文件 -->
+	<script type="text/javascript" src="js/vue.js"></script>
+	<script type="text/javascript">
+		//变量用于存储Vue实例 Vue本质还是把数据填充到页面的标签中
+		var vm = new Vue({
+			el: '#app', //页面上填充的位置
+			data: {
+				msg: 'Hello Vue',
+				msg1: '<h1>Hello Vue</h1>',
+				num: 0,
+			},
+			//方法属性
+			methods: {
+				plus: function() {
+					//true this是Vue对象
+					console.log(this === vm);
+					//num++ 会报错 num is not defined   
+					this.num++;
+				},
+				//通过点击事件的冒泡触发
+				handle0: function() {
+					this.num++;
+				},
+				//通过点击事件触发
+				handle1: function(event) {
+					console.log('event.target.innerHTML: ', event.target.innerHTML);
+					event.stopPropagation();
+				},
+				handle2: function(p1,p2,event) {
+					console.log(p1,p2)
+					console.log('event.target.tagName: ', event.target.tagName);
+					console.log('event.target.innerHTML: ', event.target.innerHTML)
+				}
+			}
+		});
+	</script>
+</body>
